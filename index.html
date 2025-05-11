@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockVote - Secure Blockchain Voting System</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/glitch.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Fixed Background Elements -->
+        <div class="bg-elements">
+            <div class="cube"></div>
+            <div class="cube"></div>
+            <div class="cube"></div>
+            <div class="cube"></div>
+            <div class="cube"></div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="logo">
+                <div class="glitch-wrapper">
+                    <div class="glitch" data-text="BlockVote">BlockVote</div>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="active">Home</a>
+                <a href="#about">About</a>
+                <a href="#candidates">Candidates</a>
+                <a href="#results">Results</a>
+            </div>
+            <div class="wallet-status">
+                <span class="status-indicator"></span>
+                <span class="wallet-address">Not Connected</span>
+                <button id="connectWallet" class="btn btn-connect">Connect Wallet</button>
+            </div>
+            <div class="burger-menu">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main>
+            <!-- Home Section -->
+            <section id="home" class="section active">
+                <div class="container">
+                    <div class="hero">
+                        <h1 class="hero-title">
+                            <span class="glitch-text" data-text="Secure">Secure</span>
+                            <span class="glitch-text" data-text="Transparent">Transparent</span>
+                            <span class="glitch-text" data-text="Decentralized">Decentralized</span>
+                        </h1>
+                        <p class="hero-description">Next generation blockchain-based voting system designed for security, transparency, and trust.</p>
+                        <div class="cta-buttons">
+                            <button id="registerVoteBtn" class="btn btn-primary" disabled>Register to Vote</button>
+                            <button id="learnMoreBtn" class="btn btn-secondary">Learn More</button>
+                        </div>
+                        
+                        <div class="stats-container">
+                            <div class="stat-box">
+                                <div class="stat-value" id="totalVoters">0</div>
+                                <div class="stat-label">Registered Voters</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="totalVotes">0</div>
+                                <div class="stat-label">Total Votes</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" id="timeRemaining">00:00:00</div>
+                                <div class="stat-label">Time Remaining</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="blockchain-visual">
+                    <div class="chain">
+                        <div class="block"></div>
+                        <div class="block"></div>
+                        <div class="block"></div>
+                        <div class="block"></div>
+                        <div class="block"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="section">
+                <div class="container">
+                    <h2 class="section-title">About <span>BlockVote</span></h2>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                            <h3>Secure Voting</h3>
+                            <p>Cryptographically secure voting ensures that your vote cannot be tampered with once cast.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-eye"></i></div>
+                            <h3>Full Transparency</h3>
+                            <p>All votes are recorded on the blockchain and can be verified by anyone without revealing voter identity.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-globe"></i></div>
+                            <h3>Decentralized</h3>
+                            <p>No central authority controls the voting process, eliminating the possibility of manipulation.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-bolt"></i></div>
+                            <h3>Instant Results</h3>
+                            <p>Results are calculated in real-time as votes are cast, with final tallying done automatically.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="about-content">
+                        <div class="how-it-works">
+                            <h3>How It Works</h3>
+                            <div class="step-container">
+                                <div class="step">
+                                    <div class="step-number">01</div>
+                                    <div class="step-content">
+                                        <h4>Connect Your Wallet</h4>
+                                        <p>Connect your Ethereum wallet to verify your identity securely.</p>
+                                    </div>
+                                </div>
+                                <div class="step">
+                                    <div class="step-number">02</div>
+                                    <div class="step-content">
+                                        <h4>Register to Vote</h4>
+                                        <p>Register your wallet address to participate in the voting process.</p>
+                                    </div>
+                                </div>
+                                <div class="step">
+                                    <div class="step-number">03</div>
+                                    <div class="step-content">
+                                        <h4>Cast Your Vote</h4>
+                                        <p>Browse candidates and cast your vote securely on the blockchain.</p>
+                                    </div>
+                                </div>
+                                <div class="step">
+                                    <div class="step-number">04</div>
+                                    <div class="step-content">
+                                        <h4>Verify Results</h4>
+                                        <p>View real-time results and verify the integrity of the election.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Candidates Section -->
+            <section id="candidates" class="section">
+                <div class="container">
+                    <h2 class="section-title">Election <span>Candidates</span></h2>
+                    <div class="election-info">
+                        <h3 id="electionName">Current Election</h3>
+                        <p id="electionDescription">Election details will appear here once connected.</p>
+                        <div class="election-status" id="electionStatus">
+                            <span class="status">Status:</span>
+                            <span class="status-value">Not Started</span>
+                        </div>
+                    </div>
+                    
+                    <div id="candidatesGrid" class="candidates-grid">
+                        <!-- Candidates will be loaded dynamically via JavaScript -->
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <p>Connect your wallet to view candidates</p>
+                        </div>
+                    </div>
+                    
+                    <div class="voter-status" id="voterStatus">
+                        <p>You are not registered to vote in this election.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results" class="section">
+                <div class="container">
+                    <h2 class="section-title">Election <span>Results</span></h2>
+                    
+                    <div class="results-container">
+                        <div class="results-summary">
+                            <h3>Current Results</h3>
+                            <p id="resultsStatus">Results will be available once the election has started.</p>
+                            
+                            <div class="total-votes-display">
+                                <div class="vote-counter">
+                                    <span id="resultsVoteCount">0</span>
+                                    <span class="vote-label">Total Votes</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="results-chart-container">
+                            <canvas id="resultsChart"></canvas>
+                        </div>
+                        
+                        <div id="resultsList" class="results-list">
+                            <!-- Results will be loaded dynamically via JavaScript -->
+                        </div>
+                        
+                        <div id="winners" class="winners-container">
+                            <h3>Election Winner</h3>
+                            <div class="winners-display">
+                                <!-- Winners will be loaded dynamically via JavaScript -->
+                                <p>Results will be displayed after the election ends.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Admin Panel (Only shown to admin) -->
+            <section id="admin" class="section admin-section">
+                <div class="container">
+                    <h2 class="section-title">Admin <span>Control Panel</span></h2>
+                    
+                    <div class="admin-controls">
+                        <div class="admin-card">
+                            <h3>Election Management</h3>
+                            <div class="input-group">
+                                <label for="adminElectionName">Election Name</label>
+                                <input type="text" id="adminElectionName" placeholder="Enter election name">
+                            </div>
+                            <div class="input-group">
+                                <label for="adminElectionDesc">Election Description</label>
+                                <textarea id="adminElectionDesc" placeholder="Enter election description"></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label for="adminElectionDuration">Duration (minutes)</label>
+                                <input type="number" id="adminElectionDuration" min="1" value="60">
+                            </div>
+                            <button id="startElectionBtn" class="btn btn-primary">Start Election</button>
+                            <button id="endElectionBtn" class="btn btn-danger">End Election</button>
+                        </div>
+                        
+                        <div class="admin-card">
+                            <h3>Candidate Management</h3>
+                            <div class="input-group">
+                                <label for="adminCandidateName">Candidate Name</label>
+                                <input type="text" id="adminCandidateName" placeholder="Enter candidate name">
+                            </div>
+                            <div class="input-group">
+                                <label for="adminCandidateParty">Party/Affiliation</label>
+                                <input type="text" id="adminCandidateParty" placeholder="Enter party or affiliation">
+                            </div>
+                            <div class="input-group">
+                                <label for="adminCandidateImage">Image URL/IPFS Hash</label>
+                                <input type="text" id="adminCandidateImage" placeholder="Enter image URL or IPFS hash">
+                            </div>
+                            <button id="addCandidateBtn" class="btn btn-primary">Add Candidate</button>
+                        </div>
+                        
+                        <div class="admin-card">
+                            <h3>Voter Management</h3>
+                            <div class="input-group">
+                                <label for="adminVoterAddress">Voter ETH Address</label>
+                                <input type="text" id="adminVoterAddress" placeholder="Enter voter's Ethereum address">
+                            </div>
+                            <button id="registerVoterBtn" class="btn btn-primary">Register Voter</button>
+                            <div class="registered-voters">
+                                <h4>Recently Registered</h4>
+                                <ul id="votersList">
+                                    <!-- Registered voters will appear here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-logo">
+                        <div class="logo">BlockVote</div>
+                        <p>Secure blockchain-based voting system</p>
+                    </div>
+                    <div class="footer-links">
+                        <div class="link-group">
+                            <h4>Navigation</h4>
+                            <a href="#home">Home</a>
+                            <a href="#about">About</a>
+                            <a href="#candidates">Candidates</a>
+                            <a href="#results">Results</a>
+                        </div>
+                        <div class="link-group">
+                            <h4>Resources</h4>
+                            <a href="#">Documentation</a>
+                            <a href="#">FAQ</a>
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                    <div class="footer-newsletter">
+                        <h4>Stay Updated</h4>
+                        <p>Get the latest news about upcoming elections</p>
+                        <form class="newsletter-form">
+                            <input type="email" placeholder="Your email address">
+                            <button type="submit" class="btn btn-primary">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2025 BlockVote. All rights reserved.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Modal Components -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/4.0.1/web3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/web3.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
