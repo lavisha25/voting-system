@@ -839,3 +839,325 @@ window.initWeb3 = initWeb3;
 window.determineImplementation = determineImplementation;
 
 // Automatically determine implementation after Web3
+// Automatically determine implementation after Web3 initialization
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Web3 and set up event listeners
+    initWeb3()
+        .then(() => {
+            console.log('Blockchain connection initialized');
+            setupAccountChangeListener();
+            determineImplementation();
+        })
+        .catch(error => {
+            console.error('Failed to initialize blockchain connection:', error);
+            // Fall back to mock implementation if Web3 initialization fails
+            determineImplementation();
+        });
+});
+
+// Export additional utility functions for use in other files
+
+// Format timestamp to readable date
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString();
+}
+
+// Check if an election has ended
+function isElectionEnded(endTime) {
+    return Date.now() > endTime * 1000;
+}
+
+// Format wallet address for display (truncate middle)
+function formatAddress(address) {
+    if (!address) return '';
+    return address.substring(0, 6) + '...' + address.substring(address.length - 4);
+}
+
+// Calculate time remaining for an election
+function getTimeRemaining(endTime) {
+    const total = endTime * 1000 - Date.now();
+    
+    if (total <= 0) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, ended: true };
+    }
+    
+    const seconds = Math.floor((total / 1000) % 60);
+    const minutes = Math.floor((total / 1000 / 60) % 60);
+    const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+    const days = Math.floor(total / (1000 * 60 * 60 * 24));
+    
+    return {
+        total,
+        days,
+        hours,
+        minutes,
+        seconds,
+        ended: false
+    };
+}
+
+// Update countdown timer for active elections
+function updateCountdowns() {
+    const countdownElements = document.querySelectorAll('.election-countdown');
+    
+    countdownElements.forEach(element => {
+        const endTime = parseInt(element.dataset.endTime);
+        const time = getTimeRemaining(endTime);
+        
+        if (time.ended) {
+            element.innerHTML = '<span class="ended-tag">Ended</span>';
+            element.closest('.election-card')?.classList.add('election-ended');
+        } else {
+            element.innerHTML = `
+                <span class="countdown-item">${time.days}d</span>
+                <span class="countdown-item">${time.hours}h</span>
+                <span class="countdown-item">${time.minutes}m</span>
+                <span class="countdown-item">${time.seconds}s</span>
+            `;
+        }
+    });
+}
+
+// Start countdown timers
+function startCountdowns() {
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
+}
+
+// Export utility functions
+window.formatTimestamp = formatTimestamp;
+window.isElectionEnded = isElectionEnded;
+window.formatAddress = formatAddress;
+window.getTimeRemaining = getTimeRemaining;
+window.startCountdowns = startCountdowns;
+
+// Error handling functions
+function handleTransactionError(error) {
+    console.error('Transaction error:', error);
+    
+    // Extract error message
+    let errorMessage = 'Transaction failed';
+    
+    if (typeof error === 'string') {
+        errorMessage = error;
+    } else if (error.message) {
+        errorMessage = error.message;
+    }
+    
+    // Clean up common blockchain error messages
+    if (errorMessage.includes('User denied transaction')) {
+        errorMessage = 'Transaction was rejected in your wallet';
+    } else if (errorMessage.includes('insufficient funds')) {
+        errorMessage = 'Insufficient funds in your wallet for this transaction';
+    } else if (errorMessage.includes('nonce too low')) {
+        errorMessage = 'Transaction error: Please refresh the page and try again';
+    }
+    
+    // Display error in UI
+    if (typeof showNotification === 'function') {
+        showNotification(errorMessage, 'error');
+    } else {
+        alert('Error: ' + errorMessage);
+    }
+}
+
+window.handleTransactionError = handleTransactionError;
+
+// Load election data with all details (candidates, results if ended)
+async function loadElectionDetails(electionId) {
+    try {
+        // Get election basic info
+        const election = await window.votingSystemContract.methods.getElection(electionId).call();
+        
+        // Get candidates
+        const candidates = await window.getCandidates(electionId);
+        
+        // Check if user has voted
+        const accounts = await web3.eth.getAccounts();
+        const hasVoted = accounts.length > 0 
+            ? await window.hasVoted(electionId, accounts[0]) 
+            : false;
+        
+        // Get results if election has ended
+        let results = null;
+        if (Date.now() > election.endTime * 1000) {
+            results = await window.getElectionResults(electionId);
+        }
+        
+        return {
+            election: {
+                id: election.id,
+                name: election.name,
+                description: election.description,
+                creator: election.creator,
+                endTime: parseInt(election.endTime),
+                isWhitelistOnly: election.isWhitelistOnly
+            },
+            candidates,
+            hasVoted,
+            results
+        };
+    } catch (error) {
+        console.error(`Error loading election details for ${electionId}:`, error);
+        throw new Error('Failed to load election details');
+    }
+}
+
+window.loadElectionDetails = loadElectionDetails;
+
+// Check if the current network is supported
+async function checkNetwork() {
+    if (!web3) return false;
+    
+    try {
+        const networkId = await web3.eth.net.getId();
+        const networkName = getNetworkName(networkId);
+        
+        console.log('Connected to network:', networkName, '(ID:', networkId, ')');
+        
+        // Check if this is a supported network
+        // Add your supported network IDs here
+        const supportedNetworks = [1, 3, 4, 5, 42, 56, 97, 137, 80001];
+        
+        return supportedNetworks.includes(networkId);
+    } catch (error) {
+        console.error('Error checking network:', error);
+        return false;
+    }
+}
+
+// Get network name from ID
+function getNetworkName(networkId) {
+    const networks = {
+        1: 'Ethereum Mainnet',
+        3: 'Ropsten Testnet',
+        4: 'Rinkeby Testnet',
+        5: 'Goerli Testnet',
+        42: 'Kovan Testnet',
+        56: 'BSC Mainnet',
+        97: 'BSC Testnet',
+        137: 'Polygon Mainnet',
+        80001: 'Mumbai Testnet'
+    };
+    
+    return networks[networkId] || 'Unknown Network';
+}
+
+window.checkNetwork = checkNetwork;
+window.getNetworkName = getNetworkName;
+
+// Check if MetaMask is locked
+async function isWalletLocked() {
+    if (!window.ethereum) return true;
+    
+    try {
+        const accounts = await window.ethereum.request({
+            method: 'eth_accounts'
+        });
+        
+        return accounts.length === 0;
+    } catch (error) {
+        console.error('Error checking if wallet is locked:', error);
+        return true;
+    }
+}
+
+window.isWalletLocked = isWalletLocked;
+
+// Add network change handler for improved UX
+function addNetworkChangeHandler() {
+    if (window.ethereum) {
+        window.ethereum.on('chainChanged', (chainId) => {
+            // Handle chain change
+            const networkId = parseInt(chainId, 16);
+            const networkName = getNetworkName(networkId);
+            
+            console.log('Network changed to:', networkName, '(ID:', networkId, ')');
+            
+            // Check if this is a supported network
+            const supportedNetworks = [1, 3, 4, 5, 42, 56, 97, 137, 80001];
+            
+            if (!supportedNetworks.includes(networkId)) {
+                if (typeof showNotification === 'function') {
+                    showNotification('Warning: Connected to unsupported network. Some features may not work correctly.', 'warning');
+                }
+            }
+            
+            // Reload the page to ensure everything is in sync
+            window.location.reload();
+        });
+    }
+}
+
+// Add this to initialization functions
+window.addNetworkChangeHandler = addNetworkChangeHandler;
+
+// Initialize everything related to blockchain
+function initializeBlockchain() {
+    initWeb3()
+        .then(() => {
+            console.log('Web3 initialized successfully');
+            setupAccountChangeListener();
+            addNetworkChangeHandler();
+            determineImplementation();
+            
+            // Check if on a supported network
+            checkNetwork().then(isSupported => {
+                if (!isSupported) {
+                    console.warn('Connected to unsupported network');
+                    if (typeof showNotification === 'function') {
+                        showNotification('Warning: Connected to unsupported network. Some features may not work correctly.', 'warning');
+                    }
+                }
+            });
+            
+            // Notify the app that blockchain is ready
+            if (typeof appState !== 'undefined') {
+                appState.blockchain = {
+                    initialized: true,
+                    error: null
+                };
+                
+                // If there's a callback for blockchain ready, call it
+                if (typeof onBlockchainReady === 'function') {
+                    onBlockchainReady();
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Failed to initialize blockchain:', error);
+            
+            // Set error state
+            if (typeof appState !== 'undefined') {
+                appState.blockchain = {
+                    initialized: false,
+                    error: error.message
+                };
+            }
+            
+            // Fall back to mock implementation
+            determineImplementation();
+            
+            // Show error notification
+            if (typeof showNotification === 'function') {
+                showNotification('Blockchain connection failed: ' + error.message, 'error');
+            }
+        });
+}
+
+// Replace the existing initialization with this comprehensive one
+window.initializeBlockchain = initializeBlockchain;
+
+// Override DOMContentLoaded event listener to use the new init function
+const existingDOMContentLoadedListener = document.addEventListener;
+document.addEventListener = function(event, callback) {
+    if (event === 'DOMContentLoaded' && callback.toString().includes('initWeb3')) {
+        existingDOMContentLoadedListener.call(document, event, () => {
+            // Use the new comprehensive initialization instead
+            initializeBlockchain();
+        });
+    } else {
+        existingDOMContentLoadedListener.apply(document, arguments);
+    }
+};
