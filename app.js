@@ -64,6 +64,169 @@ function setupEventListeners() {
         });
     });
     
+
+
+// Enhanced app.js for Voting System Project
+// Includes features: prevent post-end voting, countdown timer, CSV export, transaction links, admin panel tools, and more.
+
+// (Previous imports and appState definition remain unchanged)
+
+function castVote() {
+    if (!appState.selectedElection || appState.selectedCandidate === null) {
+        showNotification('error', 'Please select a candidate');
+        return;
+    }
+
+    const endDate = new Date(appState.selectedElection.endTime * 1000);
+    if (Date.now() > endDate.getTime()) {
+        showNotification('error', 'Election has ended. You cannot vote.');
+        return;
+    }
+
+    showConfirmationModal(
+        'Confirm Vote',
+        `Are you sure you want to cast your vote? This action cannot be undone.`,
+        () => {
+            const button = document.getElementById('submit-vote');
+            button.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; margin: 0;"></div>';
+            button.disabled = true;
+
+            vote(appState.selectedElection.id, appState.selectedCandidate)
+                .then(receipt => {
+                    showNotification(
+                        'success',
+                        `Vote cast! <a href='https://etherscan.io/tx/${receipt.transactionHash}' target='_blank'>View Transaction</a>`
+                    );
+
+                    // ✅ Log vote to MongoDB
+                    fetch('http://localhost:5000/api/log-vote', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            wallet: appState.wallet.address,
+                            electionId: appState.selectedElection.id,
+                            candidateId: appState.selectedCandidate,
+                            txHash: receipt.transactionHash
+                        })
+                    }).then(res => {
+                        if (!res.ok) {
+                            console.error('Failed to log vote to DB');
+                        }
+                    }).catch(err => {
+                        console.error('MongoDB logging error:', err);
+                    });
+
+                    // ✅ Update UI
+                    document.getElementById('voting-action').style.display = 'none';
+                    document.getElementById('voting-results').style.display = 'block';
+                    loadElectionResults(appState.selectedElection.id);
+                })
+                .catch(error => {
+                    console.error('Failed to cast vote:', error);
+                    showNotification('error', 'Failed to cast vote: ' + error.message);
+                })
+                .finally(() => {
+                    button.innerHTML = 'Submit Vote';
+                    button.disabled = false;
+                });
+        }
+    );
+}
+
+
+function loadElectionResults(electionId) {
+    const container = document.getElementById('results-chart');
+    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading results...</p></div>';
+
+    getElectionResults(electionId)
+        .then(results => getCandidates(electionId).then(candidates => ({ results, candidates })))
+        .then(data => {
+            container.innerHTML = '<canvas id="results-canvas"></canvas><button id="export-csv" class="btn secondary-btn">Export CSV</button>';
+
+            const labels = data.candidates.map(c => c.name);
+            const votes = data.results;
+
+            const ctx = document.getElementById('results-canvas').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Votes',
+                        data: votes,
+                        backgroundColor: 'rgba(157, 118, 234, 0.7)',
+                        borderColor: 'rgba(157, 118, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            document.getElementById('export-csv').onclick = () => {
+                const csv = ['Candidate,Votes'];
+                labels.forEach((label, i) => csv.push(`${label},${votes[i]}`));
+                const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `election_${electionId}_results.csv`;
+                a.click();
+            };
+        })
+        .catch(error => {
+            console.error('Failed to load election results:', error);
+            container.innerHTML = '<p class="empty-state">Failed to load results. Please try again later.</p>';
+            showNotification('error', 'Failed to load election results');
+        });
+}
+
+function createElectionCard(election) {
+    const card = document.createElement('div');
+    card.className = 'election-card';
+    card.dataset.id = election.id;
+
+    const endDate = new Date(election.endTime * 1000);
+    const timeRemaining = getTimeRemaining(endDate);
+    const isActive = Date.now() < endDate.getTime();
+
+    card.innerHTML = `
+        <h3>${election.name}</h3>
+        <p>${election.description}</p>
+        <div class="election-meta">
+            <div class="election-status">
+                <div class="status-indicator ${isActive ? 'active' : 'ended'}"></div>
+                <span>${isActive ? 'Active' : 'Ended'}</span>
+            </div>
+            <div class="time-remaining">
+                <i class="fas fa-clock"></i>
+                <span>${isActive ? timeRemaining : 'Ended'}</span>
+            </div>
+        </div>`;
+
+    card.addEventListener('click', () => viewElectionDetails(election));
+    return card;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Home page buttons
     document.getElementById('connect-wallet').addEventListener('click', () => connectWallet());
     document.getElementById('explore-btn').addEventListener('click', () => navigateTo('about'));

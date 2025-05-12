@@ -121,6 +121,24 @@ const VotingSystemABI = [
     }
 ];
 
+
+
+
+
+
+async function closeElection(electionId) {
+    const accounts = await web3.eth.getAccounts();
+    return votingSystemContract.methods.closeElection(electionId).send({ from: accounts[0] });
+}
+
+
+
+
+
+
+
+
+
 // Contract address on the blockchain network
 const CONTRACT_ADDRESS = '0x123456789abcdef123456789abcdef123456789'; // Replace with actual contract address
 
